@@ -1,5 +1,4 @@
 const validatePassword = (password)=>{
-    let cleanPassword = password.replace(/[]/)
     const errors = [];
     if(password.length <8){
         errors.push('No mínimo 8 caracteres');
@@ -19,6 +18,12 @@ const validatePassword = (password)=>{
     return errors
 }
 const validateEmail = (email)=>{
-    let error = ''
-    if(!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*$/.test(email)){}
+    if(!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*$/.test(email)){
+        return 'Insira um e-mail válido'
+    }
 };
+const validateName = (name)=>{
+    if(name.length <2 || name.length >50){
+        return 'O nome deve ter entre 2 e 50 caracteres'
+    }
+}

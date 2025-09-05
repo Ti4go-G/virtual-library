@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
+import bcrypt from 'bcrypt';
 
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
+        required: [true, 'O nome é obrigatório'],
         minlength: 2,
         maxlength: 50,
         set: capitalize,
@@ -13,37 +14,58 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ["user", "admin"],
         default: "user",
-        
+
     },
     password: {
         type: String,
         required: true,
         minlength: 8,
-        match:[/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, 'A senha deve conter no minimo 8 caracteres, uma letra maiuscula, uma letra minuscula, um numero e um caractere especial']
+        select: false
+
     },
     email: {
         type: String,
-        required: true,
+        required: [true, 'O email é obrigatório'],
         unique: true,
-        match:[/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*$/, 'Por favor insira um email valido']
+        trim: true,
+        lowercase: true,
+        match: [/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*$/, 'Por favor insira um email valido']
     }
 })
 
 const capitalize = (str) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
-userSchema.pre('save', async function (next){
-    if(!this.isModified('password')) return next();
+const hashPassword = async (password) => {
+    const salt = await bcrypt.genSalt(10);
+    return bcrypt.hash(password, salt);
+}
+
+userSchema.pre('findOneAndUpdate', async function (next) {
+    const update = this.getUpdate();
+    if (!update) return next();
+    if (!update.password) return next();
     try {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(this.password, salt);
+        const hashedPassword = await hashPassword(update.password);
+        this.setUpdate({ ...update, password: hashedPassword });
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
+
+userSchema.pre('save', async function (next) {
+    if (!this.isModified('password')) return next();
+    try {
+        const hashedPassword = await hashPassword(this.password);
         this.password = hashedPassword;
     } catch (error) {
         next(error);
     }
 })
-
-userSchema.pre('save')
+userSchema.methods.comparePassword = async function (userPassword) {
+    return bcrypt.compare(userPassword, this.password);
+}
 
 const User = mongoose.model("User", userSchema);
 
