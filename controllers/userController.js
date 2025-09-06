@@ -35,7 +35,7 @@ export const loginUser = async (req, res) => {
             return res.status(401).json({message: 'Email ou senha inválidos'})
         }
 
-        //implementar jwt ou sessions
+        res.status(200).json({message: "login realizado com sucesso"})
     } catch (error) {
         res.status(500).json({message: 'Ocorreu um erro ao buscar o usuário'})
     }
@@ -75,7 +75,7 @@ export const updateUser = async(req,res)=>{
 }
 export const getUsers = async(req,res)=>{
     try {
-        const users = User.find().select('-password');
+        const users = await User.find().select('-password');
         return res.status(200).json(users);
     } catch (error) {
         res.status(500).json({message: 'Ocorreu um erro ao buscar os usuários'})
@@ -84,5 +84,8 @@ export const getUsers = async(req,res)=>{
 
 export const getRegisterPage = (req, res) => {
     res.render('register', { errors: [], name: '', email: '' });
+}
+export const getHome = (req,res)=>{
+    res.render('home')
 }
 
