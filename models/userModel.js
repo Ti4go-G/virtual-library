@@ -1,5 +1,12 @@
 import mongoose from "mongoose";
 import bcrypt from 'bcrypt';
+const capitalize = (str) => {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+const hashPassword = async (password) => {
+    const salt = await bcrypt.genSalt(10);
+    return bcrypt.hash(password, salt);
+}
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -33,13 +40,7 @@ const userSchema = new mongoose.Schema({
     }
 })
 
-const capitalize = (str) => {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
-const hashPassword = async (password) => {
-    const salt = await bcrypt.genSalt(10);
-    return bcrypt.hash(password, salt);
-}
+
 
 userSchema.pre('findOneAndUpdate', async function (next) {
     const update = this.getUpdate();
