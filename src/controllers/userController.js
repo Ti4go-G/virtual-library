@@ -31,7 +31,7 @@ export const loginUser = async (req, res) => {
 
     try {
         const user = await User.findOne({email}).select('+password');
-        if(!user || !(await user.comparePassword(password))){
+        if(!user || !(await User.comparePassword(password))){
             return res.status(401).json({message: 'Email ou senha inválidos'})
         }
 
@@ -64,7 +64,9 @@ export const updateUser = async(req,res)=>{
     }
 
     try {
-        const updatedUser = await User.findByIdAndUpdate(id, { name, email, password }, { new: true });
+        const updatedUser = await User.findByIdAndUpdate(id, { name, email, password }, { new: true },
+        {runValidators: true}
+        );
         if (!updatedUser) {
             return res.status(404).json({ message: 'Usuário não encontrado.' });
         }

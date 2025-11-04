@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
 
 const bookSchema = new Schema({
-    userId: {
-        type: String,
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
     },
     bookName: {
@@ -30,7 +31,8 @@ const bookSchema = new Schema({
     },
     urlImg:{
         type: String,
-        default: ''
+        default: '',
+        required: false
     }
 
 }, { timestamps: true })
