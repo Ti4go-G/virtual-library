@@ -40,7 +40,7 @@ export const loginUser = async (req, res) => {
         res.status(500).json({message: 'Ocorreu um erro ao buscar o usuário'})
     }
 }
-export const deleteUser = async(req,res)=>{
+export const deleteUserById = async(req,res)=>{
     const { id } = req.params;
      if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: 'ID de usuário inválido.' });
@@ -83,6 +83,22 @@ export const getUsers = async(req,res)=>{
         res.status(500).json({message: 'Ocorreu um erro ao buscar os usuários'})
     }
 }
+export const getUserById = async(req,res)=>{
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'ID de usuário inválido.' });
+    }
+    try {
+        const user = await User.findById(id).select('-password');
+        if (!user) {
+            return res.status(404).json({ message: 'Usuário não encontrado.' });
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Ocorreu um erro ao buscar o usuário.' });
+    }
+}
+
 
 export const getRegisterPage = (req, res) => {
     res.render('register', { errors: [], name: '', email: '' });
