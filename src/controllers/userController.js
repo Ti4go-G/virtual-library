@@ -1,5 +1,9 @@
 import User from '../models/userModel.js';
 import {validatePassword, validateEmail, validateName} from '../utils/validations.js'
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+dotenv.config();
 
 export const createUser = async (req, res) => {
     const { name, email, password } = req.body;
@@ -25,19 +29,26 @@ export const createUser = async (req, res) => {
 };
 export const loginUser = async (req, res) => {
     const {email, password} = req.body
+
     if(!email || !password){
         return res.status(400).json({message: 'Por favor, forneça email e senha'})
     }
 
+
     try {
         const user = await User.findOne({email}).select('+password');
-        if(!user || !(await User.comparePassword(password))){
+        if(!user || !(await user.comparePassword(password))){
             return res.status(401).json({message: 'Email ou senha inválidos'})
         }
 
-        res.status(200).json({message: "login realizado com sucesso"})
+        const token = jwt.sign({
+          id: user._id,
+          role: user.role
+         }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+        res.status(200).json({message: "login realizado com sucesso", token})
     } catch (error) {
-        res.status(500).json({message: 'Ocorreu um erro ao buscar o usuário'})
+
+        res.status(500).json({message: 'Ocorreu um erro ao buscar o usuário'},error)
     }
 }
 export const deleteUserById = async(req,res)=>{
